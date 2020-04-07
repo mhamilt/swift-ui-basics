@@ -39,6 +39,7 @@ class ViewController: NSViewController
     
         let path = CGPath(rect: rect, transform: nil)
         
+        
         var sublayers: [CAShapeLayer]! = []
         
         
@@ -85,7 +86,6 @@ class ViewController: NSViewController
             animation?.toValue = (sin(((2 * CGFloat.pi) * (CGFloat(i) + phasor)) / CGFloat(numLayers))) * view.bounds.midY
             layer?.add(animation!, forKey: animationKey)
         }
-        
     }
 }
 
