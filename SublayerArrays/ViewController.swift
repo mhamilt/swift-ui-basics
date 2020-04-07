@@ -4,7 +4,10 @@ class ViewController: NSViewController
 {
     //--------------------------------------------------------------------------
     var timer: Timer!
-    var rotationAnimation: CABasicAnimation!
+    var waveAnimations: [CABasicAnimation]! = []
+    let numLayers = 100
+    var phasor: CGFloat = 0.0;
+    let animationKey = "sine"
     //--------------------------------------------------------------------------
     override func viewDidLoad()
     {
@@ -12,11 +15,17 @@ class ViewController: NSViewController
         view.wantsLayer = true
         setupAnimation()
         addSquareLayerArray()
-        timer = Timer.scheduledTimer(timeInterval: 1.0,
+        timer = Timer.scheduledTimer(timeInterval: 0.1,
                                      target: self,
                                      selector: #selector(ViewController.update),
                                      userInfo: nil,
                                      repeats: true)
+        
+        for (layer,animation) in zip(view.layer!.sublayers!,waveAnimations)
+        {
+            layer.add(animation, forKey: animationKey)
+        }
+        
     }
     //--------------------------------------------------------------------------
     func addSquareLayerArray()
@@ -31,16 +40,16 @@ class ViewController: NSViewController
         let path = CGPath(rect: rect, transform: nil)
         
         var sublayers: [CAShapeLayer]! = []
-        let numLayers = 100
         
-        for i in 1..<numLayers
+        
+        for i in 0..<numLayers
         {
             let sublayer = CAShapeLayer()
             sublayer.fillColor = NSColor.green.cgColor
             sublayer.path = path
             sublayer.bounds = rect
             sublayer.position =
-                CGPoint(x: (superlayer.bounds.size.width * CGFloat(i)) / CGFloat(numLayers),
+                CGPoint(x: (superlayer.bounds.size.width * CGFloat(i)) / CGFloat(numLayers) + rect.width,
                         y: superlayer.bounds.size.height/2)
             sublayers.append(sublayer)
         }
@@ -50,18 +59,33 @@ class ViewController: NSViewController
 
     func setupAnimation()
     {
-        rotationAnimation = CABasicAnimation(keyPath: "transform.rotation.z")
-        rotationAnimation.byValue = CGFloat.pi/2
-        rotationAnimation.duration = 0.5
-        rotationAnimation.isRemovedOnCompletion = false
+          for i in 0..<numLayers
+          {
+            let waveNodeAnimation = CABasicAnimation(keyPath: "transform.translation.y")
+            waveNodeAnimation.byValue =
+                (sin(((2 * CGFloat.pi) * CGFloat(i)) / CGFloat(numLayers))) * view.bounds.midY            
+            waveNodeAnimation.duration = 0.1
+            waveNodeAnimation.fillMode = CAMediaTimingFillMode.forwards
+            waveNodeAnimation.isRemovedOnCompletion = false
+            waveAnimations.append(waveNodeAnimation)
+        }
+        
+
     }
     //--------------------------------------------------------------------------
     @objc func update()
     {
-        for layer in (view.layer!.sublayers!)
+        phasor += 1.0;
+                
+        for i in 0..<numLayers
         {
-            layer.add(rotationAnimation, forKey: nil)
+            weak var layer = view.layer?.sublayers![i]
+            weak var animation = waveAnimations[i]
+            animation?.fromValue = animation?.toValue
+            animation?.toValue = (sin(((2 * CGFloat.pi) * (CGFloat(i) + phasor)) / CGFloat(numLayers))) * view.bounds.midY
+            layer?.add(animation!, forKey: animationKey)
         }
+        
     }
 }
 

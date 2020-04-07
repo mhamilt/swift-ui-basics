@@ -40,6 +40,8 @@ class ViewController: NSViewController
         rotationAnimation = CABasicAnimation(keyPath: "transform.rotation.z")
         rotationAnimation.byValue = CGFloat.pi/2
         rotationAnimation.duration = 0.5
+        
+//        rotationAnimation.fillMode = CAMediaTimingFillMode.forwards
         rotationAnimation.isRemovedOnCompletion = false
     }
     //--------------------------------------------------------------------------
